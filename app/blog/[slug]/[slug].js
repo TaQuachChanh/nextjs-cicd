@@ -1,41 +1,33 @@
-import { useRouter } from 'next/router';
-import { getAllBlogSlugs, getBlogData } from '../../lib/blogs';
+// pages/blog/[slug].js
 
-export async function generateStaticParams() {
-  const slugs = getAllBlogSlugs();
-  return slugs.map(slug => ({
-    slug: slug
-  }));
+import { getAllBlogPosts, getBlogPostBySlug } from '../../lib/blog'; // Thay đổi đường dẫn import nếu cần
+
+export async function getStaticPaths() {
+    const posts = await getAllBlogPosts();
+    const paths = posts.map(post => ({
+        params: { slug: post.slug }
+    }));
+    return {
+        paths,
+        fallback: false // Hoặc true nếu bạn muốn sử dụng fallback
+    };
 }
 
 export async function getStaticProps({ params }) {
-  const blogData = getBlogData(params.slug);
-  if (!blogData) {
+    const blogData = await getBlogPostBySlug(params.slug);
     return {
-      notFound: true,
-    }
-  }
-
-  return {
-    props: {
-      blogData
-    }
-  };
+        props: {
+            blogData
+        }
+    };
 }
 
-const BlogPost = ({ blogData }) => {
-  const router = useRouter();
-
-  if (router.isFallback) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div>
-      <h1>{blogData.title}</h1>
-      <div>{blogData.content}</div>
-    </div>
-  );
-};
-
-export default BlogPost;
+export default function BlogPost({ blogData }) {
+    return ( <
+        div >
+        <
+        h1 > { blogData.title } < /h1> <
+        div > { blogData.content } < /div> < /
+        div >
+    );
+}
